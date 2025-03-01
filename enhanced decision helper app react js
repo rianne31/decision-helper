@@ -1,0 +1,540 @@
+import React, { useState, useEffect } from 'react';
+
+const DecisionHelper = () => {
+  const [options, setOptions] = useState([]);
+  const [newOption, setNewOption] = useState('');
+  const [result, setResult] = useState(null);
+  const [reasoning, setReasoning] = useState('');
+  const [savedDecisions, setSavedDecisions] = useState([]);
+  const [mood, setMood] = useState('neutral'); 
+  const [criteria, setCriteria] = useState([]);
+  const [newCriterion, setNewCriterion] = useState('');
+  const [decisionHistory, setDecisionHistory] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('decide');
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [theme, setTheme] = useState('blue');
+  const [importance, setImportance] = useState(5);
+  const [animation, setAnimation] = useState('');
+
+  // Theme colors
+  const themes = {
+    blue: { primary: 'bg-blue-600', secondary: 'bg-blue-500', accent: 'border-blue-500', text: 'text-blue-600' },
+    purple: { primary: 'bg-purple-600', secondary: 'bg-purple-500', accent: 'border-purple-500', text: 'text-purple-600' },
+    green: { primary: 'bg-green-600', secondary: 'bg-green-500', accent: 'border-green-500', text: 'text-green-600' },
+    orange: { primary: 'bg-orange-600', secondary: 'bg-orange-500', accent: 'border-orange-500', text: 'text-orange-600' },
+  };
+
+  // Load saved data from local storage
+  useEffect(() => {
+    const storedDecisions = localStorage.getItem('savedDecisions');
+    if (storedDecisions) setSavedDecisions(JSON.parse(storedDecisions));
+    
+    const storedHistory = localStorage.getItem('decisionHistory');
+    if (storedHistory) setDecisionHistory(JSON.parse(storedHistory));
+    
+    const storedTheme = localStorage.getItem('appTheme');
+    if (storedTheme) setTheme(storedTheme);
+  }, []);
+
+  useEffect(() => {
+    if (showConfetti) {
+      setTimeout(() => {
+        setShowConfetti(false);
+      }, 3000);
+    }
+  }, [showConfetti]);
+
+  const addOption = () => {
+    if (newOption.trim() !== '') {
+      setOptions([...options, { text: newOption.trim(), id: Date.now() }]);
+      setNewOption('');
+      setAnimation('animate-pulse');
+      setTimeout(() => setAnimation(''), 500);
+    }
+  };
+
+  const handleKeyPress = (e, action) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (action === 'option') addOption();
+      if (action === 'criterion') addCriterion();
+    }
+  };
+
+  const removeOption = (id) => {
+    setOptions(options.filter(option => option.id !== id));
+  };
+
+  const addCriterion = () => {
+    if (newCriterion.trim() !== '') {
+      setCriteria([...criteria, { text: newCriterion.trim(), id: Date.now() }]);
+      setNewCriterion('');
+    }
+  };
+
+  const removeCriterion = (id) => {
+    setCriteria(criteria.filter(criterion => criterion.id !== id));
+  };
+
+  const generateReasoning = (selectedOption) => {
+    // Generate reasoning based on mood, criteria, and importance
+    let reasoningText = '';
+    
+    const confidenceLevel = 
+      mood === 'confident' ? 'confidently' : 
+      mood === 'cautious' ? 'carefully' : 'thoughtfully';
+    
+    const importanceText = 
+      importance > 7 ? 'This important decision' :
+      importance > 3 ? 'This decision' :
+      'This choice';
+    
+    const intro = `${importanceText} leads to "${selectedOption.text}". I ${confidenceLevel} selected this option because `;
+    
+    if (criteria.length > 0) {
+      // Use criteria to generate reasoning
+      const randomCriteria = criteria[Math.floor(Math.random() * criteria.length)].text;
+      const secondCriteria = criteria.length > 1 
+        ? criteria.filter(c => c.text !== randomCriteria)[Math.floor(Math.random() * (criteria.length - 1))].text
+        : null;
+      
+      if (secondCriteria && Math.random() > 0.5) {
+        reasoningText = intro + `it excels in both "${randomCriteria}" and "${secondCriteria}" factors.`;
+      } else {
+        const phrases = [
+          `it best satisfies the "${randomCriteria}" factor you mentioned.`,
+          `when considering "${randomCriteria}", this option clearly stands out.`,
+          `based on "${randomCriteria}", this is your optimal choice right now.`
+        ];
+        reasoningText = intro + phrases[Math.floor(Math.random() * phrases.length)];
+      }
+    } else {
+      // Generic reasoning without criteria
+      const phrases = [
+        `it aligns perfectly with your current situation.`,
+        `it provides the best balance of potential benefits.`,
+        `it presents the most interesting opportunity.`,
+        `sometimes the unexpected choice leads to the best outcomes.`,
+        `it feels right for your situation right now.`,
+        `making this choice now will save you time overthinking.`,
+        `decisive action in this direction will bring clarity.`
+      ];
+      reasoningText = intro + phrases[Math.floor(Math.random() * phrases.length)];
+    }
+    
+    return reasoningText;
+  };
+
+  const makeDecision = () => {
+    if (options.length < 2) {
+      alert('Please add at least two options to choose from!');
+      return;
+    }
+    
+    setLoading(true);
+    
+    // Simulate "thinking" time based on importance
+    const thinkingTime = 1000 + (importance * 200);
+    
+    setTimeout(() => {
+      const selectedOption = options[Math.floor(Math.random() * options.length)];
+      const generatedReasoning = generateReasoning(selectedOption);
+      
+      setResult(selectedOption);
+      setReasoning(generatedReasoning);
+      setShowConfetti(true);
+      
+      // Add to history
+      const newDecision = {
+        date: new Date().toLocaleString(),
+        options: [...options],
+        result: selectedOption,
+        reasoning: generatedReasoning,
+        mood: mood,
+        criteria: [...criteria],
+        importance: importance
+      };
+      
+      const updatedHistory = [newDecision, ...decisionHistory].slice(0, 20);
+      setDecisionHistory(updatedHistory);
+      localStorage.setItem('decisionHistory', JSON.stringify(updatedHistory));
+      
+      setLoading(false);
+    }, thinkingTime);
+  };
+
+  const saveDecision = () => {
+    if (!result) return;
+    
+    const newSavedDecision = {
+      id: Date.now(),
+      date: new Date().toLocaleString(),
+      options: [...options],
+      result: result,
+      reasoning: reasoning,
+      importance: importance
+    };
+    
+    const updatedSavedDecisions = [newSavedDecision, ...savedDecisions];
+    setSavedDecisions(updatedSavedDecisions);
+    localStorage.setItem('savedDecisions', JSON.stringify(updatedSavedDecisions));
+  };
+
+  const clearForm = () => {
+    setOptions([]);
+    setResult(null);
+    setReasoning('');
+    setCriteria([]);
+    setMood('neutral');
+    setImportance(5);
+  };
+
+  const changeTheme = (newTheme) => {
+    setTheme(newTheme);
+    localStorage.setItem('appTheme', newTheme);
+  };
+
+  const Confetti = () => {
+    if (!showConfetti) return null;
+    
+    return (
+      <div className="fixed inset-0 pointer-events-none z-50">
+        {Array.from({ length: 100 }).map((_, i) => {
+          const size = Math.random() * 10 + 5;
+          const left = Math.random() * 100;
+          const animationDuration = Math.random() * 3 + 2;
+          const delay = Math.random() * 0.5;
+          
+          return (
+            <div
+              key={i}
+              className={`absolute ${themes[theme].primary} rounded-full`}
+              style={{
+                width: size + 'px',
+                height: size + 'px',
+                left: left + '%',
+                top: '-20px',
+                opacity: Math.random() * 0.7 + 0.3,
+                animation: `fall ${animationDuration}s linear ${delay}s`,
+              }}
+            />
+          );
+        })}
+      </div>
+    );
+  };
+
+  return (
+    <div className="max-w-md mx-auto p-4 bg-gray-50 min-h-screen transition-all duration-300">
+      <style jsx>{`
+        @keyframes fall {
+          0% { transform: translateY(-10px) rotate(0deg); }
+          100% { transform: translateY(105vh) rotate(360deg); }
+        }
+        
+        .shake {
+          animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+          20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .slide-in {
+          animation: slideIn 0.3s forwards;
+        }
+        
+        @keyframes slideIn {
+          0% { transform: translateY(20px); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
+        }
+      `}</style>
+      
+      <Confetti />
+      
+      <div className="flex justify-between items-center mb-6">
+        <h1 className={`text-2xl font-bold ${themes[theme].text}`}>Decision Helper</h1>
+        <div className="flex space-x-2">
+          <button 
+            onClick={() => changeTheme('blue')}
+            className={`w-6 h-6 rounded-full bg-blue-500 ${theme === 'blue' ? 'ring-2 ring-offset-2 ring-blue-500' : ''}`}
+          />
+          <button 
+            onClick={() => changeTheme('purple')}
+            className={`w-6 h-6 rounded-full bg-purple-500 ${theme === 'purple' ? 'ring-2 ring-offset-2 ring-purple-500' : ''}`}
+          />
+          <button 
+            onClick={() => changeTheme('green')}
+            className={`w-6 h-6 rounded-full bg-green-500 ${theme === 'green' ? 'ring-2 ring-offset-2 ring-green-500' : ''}`}
+          />
+          <button 
+            onClick={() => changeTheme('orange')}
+            className={`w-6 h-6 rounded-full bg-orange-500 ${theme === 'orange' ? 'ring-2 ring-offset-2 ring-orange-500' : ''}`}
+          />
+        </div>
+      </div>
+      
+      {/* Tabs */}
+      <div className="flex border-b mb-6">
+        <button 
+          className={`px-4 py-2 font-medium ${activeTab === 'decide' ? `${themes[theme].text} border-b-2 ${themes[theme].accent}` : 'text-gray-500'}`}
+          onClick={() => setActiveTab('decide')}
+        >
+          Decide
+        </button>
+        <button 
+          className={`px-4 py-2 font-medium ${activeTab === 'history' ? `${themes[theme].text} border-b-2 ${themes[theme].accent}` : 'text-gray-500'}`}
+          onClick={() => setActiveTab('history')}
+        >
+          History
+        </button>
+        <button 
+          className={`px-4 py-2 font-medium ${activeTab === 'saved' ? `${themes[theme].text} border-b-2 ${themes[theme].accent}` : 'text-gray-500'}`}
+          onClick={() => setActiveTab('saved')}
+        >
+          Saved
+        </button>
+      </div>
+      
+      {activeTab === 'decide' && (
+        <>
+          {/* Mood Selector */}
+          <div className="mb-6">
+            <h2 className={`text-lg font-semibold mb-2 ${themes[theme].text}`}>Decision Mood</h2>
+            <div className="flex justify-between">
+              <button 
+                className={`px-4 py-2 rounded-lg transition-all ${mood === 'cautious' ? `${themes[theme].primary} text-white` : 'bg-gray-200 hover:bg-gray-300'}`}
+                onClick={() => setMood('cautious')}
+              >
+                Cautious
+              </button>
+              <button 
+                className={`px-4 py-2 rounded-lg transition-all ${mood === 'neutral' ? `${themes[theme].primary} text-white` : 'bg-gray-200 hover:bg-gray-300'}`}
+                onClick={() => setMood('neutral')}
+              >
+                Neutral
+              </button>
+              <button 
+                className={`px-4 py-2 rounded-lg transition-all ${mood === 'confident' ? `${themes[theme].primary} text-white` : 'bg-gray-200 hover:bg-gray-300'}`}
+                onClick={() => setMood('confident')}
+              >
+                Confident
+              </button>
+            </div>
+          </div>
+          
+          {/* Importance Slider */}
+          <div className="mb-6">
+            <h2 className={`text-lg font-semibold mb-2 ${themes[theme].text}`}>Importance Level</h2>
+            <div className="flex items-center">
+              <span className="text-sm text-gray-500">Low</span>
+              <input 
+                type="range" 
+                min="1" 
+                max="10" 
+                value={importance} 
+                onChange={(e) => setImportance(parseInt(e.target.value))}
+                className="mx-2 flex-grow"
+              />
+              <span className="text-sm text-gray-500">High</span>
+            </div>
+            <div className={`text-center mt-1 ${themes[theme].text} font-medium`}>
+              {importance < 4 ? 'Minor Decision' : importance < 7 ? 'Moderate Decision' : 'Important Decision'}
+            </div>
+          </div>
+          
+          {/* Options */}
+          <div className={`mb-6 ${animation}`}>
+            <h2 className={`text-lg font-semibold mb-2 ${themes[theme].text}`}>Your Options</h2>
+            <div className="flex mb-2">
+              <input
+                type="text"
+                value={newOption}
+                onChange={(e) => setNewOption(e.target.value)}
+                onKeyPress={(e) => handleKeyPress(e, 'option')}
+                className="flex-grow p-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-blue-300"
+                placeholder="Add an option..."
+              />
+              <button 
+                onClick={addOption}
+                className={`${themes[theme].primary} text-white px-4 rounded-r hover:opacity-90 transition-opacity`}
+              >
+                Add
+              </button>
+            </div>
+            
+            <ul className="bg-white rounded-lg p-2 border">
+              {options.length === 0 ? (
+                <li className="text-gray-400 p-2">No options added yet...</li>
+              ) : (
+                options.map((option) => (
+                  <li key={option.id} className="flex justify-between items-center p-2 border-b last:border-b-0 hover:bg-gray-50 group">
+                    <span>{option.text}</span>
+                    <button 
+                      onClick={() => removeOption(option.id)}
+                      className="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ✕
+                    </button>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+          
+          {/* Criteria */}
+          <div className="mb-6">
+            <h2 className={`text-lg font-semibold mb-2 ${themes[theme].text}`}>Decision Criteria (Optional)</h2>
+            <div className="flex mb-2">
+              <input
+                type="text"
+                value={newCriterion}
+                onChange={(e) => setNewCriterion(e.target.value)}
+                onKeyPress={(e) => handleKeyPress(e, 'criterion')}
+                className="flex-grow p-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-blue-300"
+                placeholder="Add a criterion..."
+              />
+              <button 
+                onClick={addCriterion}
+                className={`${themes[theme].secondary} text-white px-4 rounded-r hover:opacity-90 transition-opacity`}
+              >
+                Add
+              </button>
+            </div>
+            
+            <ul className="bg-white rounded-lg p-2 border">
+              {criteria.length === 0 ? (
+                <li className="text-gray-400 p-2">No criteria added yet...</li>
+              ) : (
+                criteria.map((criterion) => (
+                  <li key={criterion.id} className="flex justify-between items-center p-2 border-b last:border-b-0 hover:bg-gray-50 group">
+                    <span>{criterion.text}</span>
+                    <button 
+                      onClick={() => removeCriterion(criterion.id)}
+                      className="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ✕
+                    </button>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+          
+          {/* Decision Buttons */}
+          <div className="flex justify-between mb-6">
+            <button 
+              onClick={makeDecision}
+              className={`${themes[theme].primary} text-white px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 active:translate-y-0`}
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Deciding...
+                </div>
+              ) : 'Make Decision'}
+            </button>
+            <button 
+              onClick={clearForm}
+              className="bg-gray-300 px-6 py-3 rounded-lg hover:bg-gray-400 transition-colors"
+            >
+              Clear All
+            </button>
+          </div>
+          
+          {/* Result */}
+          {result && (
+            <div className={`bg-white p-4 rounded-lg border-2 ${themes[theme].accent} mb-6 shadow-lg slide-in`}>
+              <h2 className="text-xl font-bold mb-2 text-center">Decision Made!</h2>
+              <div className={`text-2xl text-center font-bold mb-3 ${themes[theme].text}`}>{result.text}</div>
+              <p className="italic text-gray-600">{reasoning}</p>
+              <button 
+                onClick={saveDecision}
+                className="mt-4 bg-yellow-500 text-white px-4 py-2 rounded-lg w-full hover:bg-yellow-600 transition-colors"
+              >
+                Save This Decision
+              </button>
+            </div>
+          )}
+        </>
+      )}
+      
+      {activeTab === 'history' && (
+        <div>
+          <h2 className={`text-lg font-semibold mb-4 ${themes[theme].text}`}>Recent Decisions</h2>
+          <div className="bg-white rounded-lg border p-2 max-h-96 overflow-y-auto">
+            {decisionHistory.length === 0 ? (
+              <p className="text-gray-400 p-4 text-center">No decisions made yet...</p>
+            ) : (
+              decisionHistory.map((decision, index) => (
+                <div key={index} className="border-b last:border-b-0 p-3 hover:bg-gray-50">
+                  <div className="flex justify-between">
+                    <span className={`font-semibold ${themes[theme].text}`}>{decision.result.text}</span>
+                    <span className="text-xs text-gray-500">{decision.date}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">{decision.reasoning}</p>
+                  <div className="flex mt-2 text-xs text-gray-500">
+                    <span className="mr-2">Mood: {decision.mood}</span>
+                    <span>Importance: {decision.importance}/10</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          {decisionHistory.length > 0 && (
+            <button 
+              onClick={() => {
+                setDecisionHistory([]);
+                localStorage.removeItem('decisionHistory');
+              }}
+              className="mt-4 text-red-500 text-sm hover:underline"
+            >
+              Clear History
+            </button>
+          )}
+        </div>
+      )}
+      
+      {activeTab === 'saved' && (
+        <div>
+          <h2 className={`text-lg font-semibold mb-4 ${themes[theme].text}`}>Saved Decisions</h2>
+          <div className="bg-white rounded-lg border p-2 max-h-96 overflow-y-auto">
+            {savedDecisions.length === 0 ? (
+              <p className="text-gray-400 p-4 text-center">No saved decisions yet...</p>
+            ) : (
+              savedDecisions.map((decision) => (
+                <div key={decision.id} className="border-b last:border-b-0 p-3 hover:bg-gray-50">
+                  <div className="flex justify-between">
+                    <span className={`font-semibold ${themes[theme].text}`}>{decision.result.text}</span>
+                    <span className="text-xs text-gray-500">{decision.date}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">{decision.reasoning}</p>
+                  <div className="mt-2 flex flex-wrap text-xs text-gray-500 gap-x-2">
+                    <span>Options: {decision.options.map(o => o.text).join(', ')}</span>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setSavedDecisions(savedDecisions.filter(d => d.id !== decision.id));
+                      localStorage.setItem('savedDecisions', JSON.stringify(
+                        savedDecisions.filter(d => d.id !== decision.id)
+                      ));
+                    }}
+                    className="mt-2 text-red-500 text-xs hover:underline"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default DecisionHelper;
