@@ -843,4 +843,301 @@ data class Decision(
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
 
-// File:
+<!-- File: item_decision.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/decisionDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mar 06, 2025 14:30"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/decisionResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Decision Result"
+            android:textColor="@color/primary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/decisionReasoning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Decision reasoning will appear here..."
+            android:textColor="@color/text_secondary"
+            android:textStyle="italic" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/decisionMood"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/tag_background"
+                android:padding="4dp"
+                android:text="Neutral"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/decisionImportance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/tag_background"
+                android:padding="4dp"
+                android:text="Importance: 5"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
+
+<!-- File: item_empty_state.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp">
+
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/ic_empty_state"
+        android:alpha="0.5" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="No decisions yet"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_secondary"
+        android:gravity="center" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Your decisions will appear here"
+        android:textSize="14sp"
+        android:textColor="@color/text_tertiary"
+        android:gravity="center" />
+</LinearLayout>
+
+<!-- File: res/anim/item_animation_from_right.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="300">
+    <translate
+        android:fromXDelta="100%p"
+        android:toXDelta="0" />
+    <alpha
+        android:fromAlpha="0.0"
+        android:toAlpha="1.0" />
+</set>
+
+<!-- File: res/anim/slide_in_up.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="400">
+    <translate
+        android:fromYDelta="100%p"
+        android:toYDelta="0" />
+    <alpha
+        android:fromAlpha="0.0"
+        android:toAlpha="1.0" />
+</set>
+
+<!-- File: res/drawable/edit_text_background.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/white" />
+    <corners android:radius="4dp" />
+    <stroke android:width="1dp" android:color="@color/border" />
+</shape>
+
+<!-- File: res/drawable/list_background.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/background_light" />
+    <corners android:radius="4dp" />
+    <stroke android:width="1dp" android:color="@color/border" />
+</shape>
+
+<!-- File: res/drawable/button_primary.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/primary" />
+    <corners android:radius="4dp" />
+</shape>
+
+<!-- File: res/drawable/button_secondary.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/background_light" />
+    <corners android:radius="4dp" />
+    <stroke android:width="1dp" android:color="@color/border" />
+</shape>
+
+<!-- File: res/drawable/tag_background.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/background_light" />
+    <corners android:radius="12dp" />
+</shape>
+
+<!-- File: res/drawable/circle_blue.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/blue_500" />
+</shape>
+
+<!-- File: res/drawable/circle_purple.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/purple_500" />
+</shape>
+
+<!-- File: res/drawable/circle_green.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/green_500" />
+</shape>
+
+<!-- File: res/drawable/circle_orange.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/orange_500" />
+</shape>
+
+<!-- File: res/drawable/ic_empty_state.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M19,3H5C3.9,3 3,3.9 3,5v14c0,1.1 0.9,2 2,2h14c1.1,0 2,-0.9 2,-2V5C21,3.9 20.1,3 19,3zM12,17H8v-1h4V17zM16,13H8v-1h8V13zM16,9H8V8h8V9z" />
+</vector>
+
+<!-- File: res/values/colors.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base theme colors -->
+    <color name="blue_500">#2196F3</color>
+    <color name="blue_700">#1976D2</color>
+    <color name="purple_500">#9C27B0</color>
+    <color name="purple_700">#7B1FA2</color>
+    <color name="green_500">#4CAF50</color>
+    <color name="green_700">#388E3C</color>
+    <color name="orange_500">#FF9800</color>
+    <color name="orange_700">#F57C00</color>
+    
+    <!-- Default app theme colors -->
+    <color name="primary">@color/blue_500</color>
+    <color name="primary_dark">@color/blue_700</color>
+    <color name="secondary">#03A9F4</color>
+    <color name="accent">#FF4081</color>
+    
+    <!-- UI colors -->
+    <color name="background">#F5F5F5</color>
+    <color name="background_light">#FFFFFF</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_tertiary">#9E9E9E</color>
+    <color name="border">#DDDDDD</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>
+
+<!-- File: res/values/strings.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Decision Helper</string>
+    <string name="decide_tab">Decide</string>
+    <string name="history_tab">History</string>
+    <string name="saved_tab">Saved</string>
+    <string name="add_option_hint">Add an option...</string>
+    <string name="add_criterion_hint">Add a criterion...</string>
+    <string name="make_decision">Make Decision</string>
+    <string name="clear_all">Clear All</string>
+    <string name="decision_made">Decision Made!</string>
+    <string name="save_decision">Save This Decision</string>
+    <string name="no_decisions">No decisions yet</string>
+    <string name="decisions_appear_here">Your decisions will appear here</string>
+    <string name="empty_options_error">Please add at least two options!</string>
+    <string name="decision_saved">Decision saved!</string>
+</resources>
+
+<!-- File: res/values/themes.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme -->
+    <style name="Theme.DecisionHelper" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+    </style>
+</resources>
+
+<!-- File: AndroidManifest.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.decisionhelper">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.DecisionHelper">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
